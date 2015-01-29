@@ -9,6 +9,7 @@
 #import "ParticipantsTableViewController.h"
 #import "ParticipantItem.h"
 #import "AddPartcipantsViewController.h"
+#import "pointageViewController.h"
 
 @interface ParticipantsTableViewController ()
 

@@ -22,6 +22,12 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view
+    
+    //ParticipantsTableViewController *source = [[ParticipantsTableViewController alloc] init];
+    
+    //self.arraySourceParticipants = source.arrayParticipants;
+    //[self.nextParticipants reloadData];
+    self.arrayTest = [[NSMutableArray alloc] initWithObjects:@"test1",@"test2", nil];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -34,6 +40,10 @@
     //ParticipantsTableViewController *sourceTable =[[ParticipantsTableViewController alloc]init];
     
     //self.arrayNextParticipants = sourceTable.arrayParticipants;
+    
+    //arrayTest = [[NSMutableArray alloc] initWithObjects:@"test1",@"test2", nil];
+    
+    
 }
 
 /*
@@ -47,19 +57,22 @@
 */
 
 - (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return [self.arrayNextParticipants count];
+    return [self.arrayTest count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"nextParticipants"];
     // Configure the cell
-    ParticipantItem *participantItem = [self.arrayNextParticipants objectAtIndex:indexPath.row];
+    //ParticipantItem *participantItem = [self.arrayNextParticipants objectAtIndex:indexPath.row];
     
     //On combine le prenom, nom et pays du participant.
     
+        //NSLog(@"Test");
     
-    cell.textLabel.text = [NSString stringWithFormat:@"%@ %@, %@", participantItem.itemPrenom, participantItem.itemNomFamille, participantItem.itemPays];
+    //cell.textLabel.text = [NSString stringWithFormat:@"%@ %@, %@", participantItem.itemPrenom, participantItem.itemNomFamille, participantItem.itemPays];
+    
+    cell.textLabel.text = [self.arrayTest objectAtIndex:indexPath.row];
     
     return cell;
     

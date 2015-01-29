@@ -12,10 +12,11 @@
 
 @property (strong, nonatomic) IBOutlet UITableView *nextParticipants;
 @property (strong, nonatomic) IBOutlet UITableView *meneursParticipants;
-@property (strong, nonatomic) IBOutlet UITextField *textfield;
 
 @property NSMutableArray *arraySourceParticipants;
 @property NSMutableArray *arrayNextParticipants;
+
+@property NSMutableArray *arrayTest;
 
 
 @end
