@@ -1,4 +1,4 @@
-//
+  //
 //  ParticipantsTableViewController.h
 //  ipad-test
 //
@@ -9,12 +9,18 @@
 #import <UIKit/UIKit.h>
 #import "pointageViewController.h"
 
+@protocol ParticipantsTableViewControllerDelegate
+
+-(void)passMutableArray:(NSMutableArray*)arrayParticipants;
+
+@end
+
 @interface ParticipantsTableViewController : UITableViewController
 
-@property NSMutableArray *arrayParticipants;
+@property(nonatomic, retain) NSMutableArray *arrayParticipants;
+@property(nonatomic, retain) id<ParticipantsTableViewControllerDelegate> delegate;
 
 - (IBAction)unwindToList:(UIStoryboardSegue *)segue;
 
-- (IBAction)envoyerDonnees:(id)sender;
 
 @end

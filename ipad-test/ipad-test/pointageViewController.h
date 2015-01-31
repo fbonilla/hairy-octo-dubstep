@@ -8,13 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
-@interface pointageViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>
+@interface pointageViewController : UIViewController <UITableViewDelegate, UITableViewDataSource>{
+    NSMutableArray *arrayNextParticipants;
+}
 
 @property (strong, nonatomic) IBOutlet UITableView *nextParticipants;
 @property (strong, nonatomic) IBOutlet UITableView *meneursParticipants;
 
 @property NSMutableArray *arraySourceParticipants;
-@property NSMutableArray *arrayNextParticipants;
+@property (nonatomic,retain)NSMutableArray *arrayNextParticipants;
 
 @property NSMutableArray *arrayTest;
 

@@ -13,9 +13,13 @@
 
 @interface ParticipantsTableViewController ()
 
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *demarrer;
+
+
 @end
 
 @implementation ParticipantsTableViewController
+@synthesize arrayParticipants;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -66,13 +70,6 @@
     
 }
 
-- (IBAction)envoyerDonnees:(id)sender {
-    
-    pointageViewController *pointage = [[pointageViewController alloc] init];
-    
-    pointage.arraySourceParticipants = self.arrayParticipants;
-    
-}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ListPrototypeCell" forIndexPath:indexPath];
@@ -122,14 +119,27 @@
 }
 */
 
-/*
+
 #pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
+//In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
+    if(sender != self.demarrer) return;
+    
+    if([[segue identifier] isEqualToString:@"envoieInfo"]){
+       if(arrayParticipants.count > 0){
+           pointageViewController *pointage = [segue destinationViewController];
+           pointage.arrayNextParticipants = arrayParticipants;
+           NSLog(@"Bouton activee");
+        
+       }
+       //Affiche un message d'erreur si l'on essaie d'envoyer un array vide.
+       else{
+           UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Aucun participants"message:[[NSString alloc]initWithFormat:@"Veuillez ajouter des participants avant de commencer la compétition"] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+           [alert show];
+       }
+    }
 }
-*/
-
 @end
