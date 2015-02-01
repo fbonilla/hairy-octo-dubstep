@@ -15,7 +15,6 @@
 
 @property (strong, nonatomic) IBOutlet UIBarButtonItem *demarrer;
 
-
 @end
 
 @implementation ParticipantsTableViewController
@@ -72,18 +71,24 @@
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ListPrototypeCell" forIndexPath:indexPath];
     
     // Configure the cell
     ParticipantItem *participantItem = [self.arrayParticipants objectAtIndex:indexPath.row];
     
-    //On combine le prenom, nom et pays du participant.
+    //On combine le prenom et nom du participant.
+    cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", participantItem.itemPrenom, participantItem.itemNomFamille];
     
+    // Le numero de dossard ira dans la section detail
+    cell.detailTextLabel.text = [NSString stringWithFormat:@"#%@", participantItem.itemNumero];
     
-    cell.textLabel.text = [NSString stringWithFormat:@"%@ %@, %@", participantItem.itemPrenom, participantItem.itemNomFamille, participantItem.itemPays];
+    // Rajouter le drapeau du pays
+    cell.imageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", participantItem.itemPays]];
     
     return cell;
 }
+
 
 /*
 // Override to support conditional editing of the table view.

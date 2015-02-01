@@ -24,6 +24,10 @@
 @property (weak, nonatomic) IBOutlet UIButton *editStartButton;
 @property (weak, nonatomic) IBOutlet UIButton *editDNFButton;
 
+@property (weak, nonatomic) IBOutlet UILabel *JoueurDossard;
+@property (weak, nonatomic) IBOutlet UIImageView *JoueurDrapeauImage;
+@property (weak, nonatomic) IBOutlet UILabel *JoueurPrenomNom;
+@property (weak, nonatomic) IBOutlet UILabel *JoueurDrapeauNom;
 
 - (void)configureView;
 
@@ -36,16 +40,18 @@
     NSTimeInterval time;
     int minutes;
     int seconds;
+    int milliseconds;
     int penaltyCountVar;
+    
 }
 
 @synthesize arrayNextParticipants;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view
     
-    self.clockDisplay.text = @"00:00";
+    // Do any additional setup after loading the view
+    self.clockDisplay.text = @"00 : 00 : 000";
     [self.editDNFButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
     start = false;
 }
@@ -62,12 +68,12 @@
         if(penaltyCountVar > 2)
         {
             DidNotFinish = true;
-            self.runtimePenaltyCount.text = [NSString stringWithFormat:@"%u", penaltyCountVar];
+            self.runtimePenaltyCount.text = [NSString stringWithFormat:@"%u", penaltyCountVar*30];
             [self endPerfomanceDNF];
         }
         else
         {
-            self.runtimePenaltyCount.text = [NSString stringWithFormat:@"%u", penaltyCountVar];
+            self.runtimePenaltyCount.text = [NSString stringWithFormat:@"%u", penaltyCountVar*30];
         }
         
     }
@@ -75,10 +81,10 @@
     NSTimeInterval currentTime = [NSDate timeIntervalSinceReferenceDate];
     NSTimeInterval elapsedTime = currentTime - time;
     
-    minutes = (int)(elapsedTime / 60.0);
-    seconds = (int) (elapsedTime = elapsedTime - (minutes * 60.0));
-    
-    self.clockDisplay.text = [NSString stringWithFormat:@"%02u:%02u", minutes, seconds];
+    minutes         = (int)(elapsedTime / 60.0);
+    seconds         = (int)(elapsedTime = elapsedTime - (minutes * 60.0));
+    milliseconds    = (elapsedTime - seconds)*1000;
+    self.clockDisplay.text = [NSString stringWithFormat:@"%02u : %02u : %03u", minutes, seconds, milliseconds];
     
     [self performSelector:@selector(update) withObject:(self) afterDelay:0.1];
 }
@@ -121,12 +127,12 @@
             if(penaltyCountVar == 1)
             {
                 seconds = seconds + 30;
-                self.finalTimeWithPenalty.text = [NSString stringWithFormat:@"%02u:%02u", minutes, seconds];
+                self.finalTimeWithPenalty.text = [NSString stringWithFormat:@"%02u : %02u : %03u", minutes, seconds, milliseconds];
             }
             else if(penaltyCountVar == 2)
             {
                 minutes = minutes + 1;
-                self.finalTimeWithPenalty.text = [NSString stringWithFormat:@"%02u:%02u", minutes, seconds];
+                self.finalTimeWithPenalty.text = [NSString stringWithFormat:@"%02u : %02u : %03u", minutes, seconds, milliseconds];
             }
         }
         else
@@ -135,8 +141,11 @@
             self.finalTimeWithPenalty.text = self.clockDisplay.text;
         }
         
+        // Afficher le resultat final
+        self.clockDisplay.text = self.finalTimeWithPenalty.text;
+        
         [sender setTitle:@"Start" forState: UIControlStateNormal];
-        [sender setTitleColor:[UIColor greenColor] forState:UIControlStateNormal];
+        [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         
     }
 
@@ -148,10 +157,10 @@
     DidNotFinish = false;
     self.finishTimeNoPenalty.text = @"DNF";
     self.finalTimeWithPenalty.text = @"DNF";
-    self.penaltyCount.text = [NSString stringWithFormat:@"%u x 30s", penaltyCountVar];
+    self.penaltyCount.text = [NSString stringWithFormat:@"%u x 30 s.", penaltyCountVar];
     
     [self.editStartButton setTitle:@"Start" forState: UIControlStateNormal];
-    [self.editStartButton  setTitleColor:[UIColor greenColor] forState:UIControlStateNormal];
+    [self.editStartButton  setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
 }
 
 - (IBAction)buttonPenality:(id)sender {
@@ -184,8 +193,7 @@
 */
 
 - (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-   // return [self.arrayNextParticipants count];
-    return [self.arrayTest count];
+   return [self.arrayNextParticipants count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -196,15 +204,19 @@
     
     //On combine le prenom, nom et pays du participant.
     //ParticipantItem *participant = [arrayNextParticipants objectAtIndex:0];
-    NSLog(@"PRenom%@",participantItem.itemPrenom);
+    NSLog(@"Prenom%@",participantItem.itemPrenom);
     
-    NSString *infoParticipant = [NSString stringWithFormat:@"%@ %@, %@", participantItem.itemPrenom, participantItem.itemNomFamille, participantItem.itemPays];
+    NSString *infoParticipant = [NSString stringWithFormat:@"%@ %@", participantItem.itemPrenom, participantItem.itemNomFamille];
     
     if(infoParticipant.length){
         cell.textLabel.text = infoParticipant;
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"#%@", participantItem.itemNumero];
+        cell.imageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", participantItem.itemPays]];
     }
     else{
         cell.textLabel.text = @"";
+        cell.detailTextLabel.text = @"";
+        cell.imageView.image = [UIImage imageNamed:@"blank.png"];
     }
     return cell;
     

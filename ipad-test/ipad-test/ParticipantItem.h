@@ -17,7 +17,7 @@
 @property NSString *infoComplete;
 
 //Numero de dossard
-@property NSValue *itemNumero;
+@property NSString *itemNumero;
 
 
 @property NSValue *itemTime;

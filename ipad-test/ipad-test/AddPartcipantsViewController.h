@@ -9,8 +9,11 @@
 #import <UIKit/UIKit.h>
 #import "ParticipantItem.h"
 
-@interface AddPartcipantsViewController : UIViewController
+@interface AddPartcipantsViewController : UIViewController <UIPickerViewDelegate, UIPickerViewDataSource>
+@property (weak, nonatomic) IBOutlet UIPickerView *picker;
 
 @property ParticipantItem *participantItem;
+@property (strong, nonatomic) NSArray *countryNames;
+@property (weak, nonatomic) IBOutlet UIImageView *drapeau;
 
 @end

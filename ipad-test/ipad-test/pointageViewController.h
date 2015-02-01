@@ -18,7 +18,4 @@
 @property NSMutableArray *arraySourceParticipants;
 @property (nonatomic,retain)NSMutableArray *arrayNextParticipants;
 
-@property NSMutableArray *arrayTest;
-
-
 @end
