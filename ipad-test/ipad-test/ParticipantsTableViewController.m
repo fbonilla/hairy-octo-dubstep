@@ -85,10 +85,15 @@
     
     // Rajouter le drapeau du pays
     cell.imageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", participantItem.itemPays]];
-    
+
     return cell;
+    
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 60;
+}
 
 /*
 // Override to support conditional editing of the table view.

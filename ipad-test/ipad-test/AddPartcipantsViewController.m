@@ -84,11 +84,29 @@
 
     if(self.Prenom.text.length > 0 && self.NomFamille.text.length >0 && self.Pays.text.length >0){
         
+        // Formattage de chiffres pour detecter lettre dans dossard
+        NSNumberFormatter * f = [[NSNumberFormatter alloc] init];
+        NSNumber * n = [f numberFromString:self.Dossard.text];
+        NSLog(@"N: %@", n);
+        
         if(self.Dossard.text.length == 0){
+
+            // Si la case est vide
+            
             self.Dossard.text = [NSString stringWithFormat:@"%u", arc4random_uniform(101)];
             NSLog(@"Dossard genere: %@", self.Dossard.text);
+            
+        }
+        else if(n == nil){
+            
+            // Si la case contient des lettres
+            
+            self.Dossard.text = [NSString stringWithFormat:@"%u", arc4random_uniform(101)];
+            NSLog(@"Dossard genere: %@", self.Dossard.text);
+            
         }
     
+        // Creation d'un nouveau participant
         self.participantItem                = [[ParticipantItem alloc] init];
         self.participantItem.itemPrenom     = self.Prenom.text;
         self.participantItem.itemNomFamille = self.NomFamille.text;

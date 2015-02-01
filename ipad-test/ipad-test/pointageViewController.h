@@ -15,7 +15,8 @@
 @property (strong, nonatomic) IBOutlet UITableView *nextParticipants;
 @property (strong, nonatomic) IBOutlet UITableView *meneursParticipants;
 
-@property NSMutableArray *arraySourceParticipants;
+//@property NSMutableArray *arraySourceParticipants;
 @property (nonatomic,retain)NSMutableArray *arrayNextParticipants;
+@property (nonatomic,retain)NSMutableArray *arrayMeneurParticipants;
 
 @end

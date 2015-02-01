@@ -25,7 +25,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *editDNFButton;
 
 @property (weak, nonatomic) IBOutlet UILabel *JoueurDossard;
-@property (weak, nonatomic) IBOutlet UIImageView *JoueurDrapeauImage;
+@property (weak, nonatomic) IBOutlet UIImageView *JoueurDrapeauImg;
 @property (weak, nonatomic) IBOutlet UILabel *JoueurPrenomNom;
 @property (weak, nonatomic) IBOutlet UILabel *JoueurDrapeauNom;
 
@@ -37,11 +37,14 @@
     
     bool start;
     bool DidNotFinish;
-    NSTimeInterval time;
+    NSTimeInterval timeInterval;
+    NSTimeInterval officialTime;
     int minutes;
     int seconds;
     int milliseconds;
     int penaltyCountVar;
+    int rowNo;
+    ParticipantItem *participantItem;
     
 }
 
@@ -50,10 +53,12 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    // Do any additional setup after loading the view
+    // Initialisation des parametres
     self.clockDisplay.text = @"00 : 00 : 000";
-    [self.editDNFButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
     start = false;
+    
+    participantItem = nil;
+
 }
 
 - (void) update{
@@ -63,12 +68,13 @@
         return;
     }
     
+    // Verification de penalites
     if(penaltyCountVar > 0)
     {
         if(penaltyCountVar > 2)
         {
             DidNotFinish = true;
-            self.runtimePenaltyCount.text = [NSString stringWithFormat:@"%u", penaltyCountVar*30];
+            self.runtimePenaltyCount.text = @"-";
             [self endPerfomanceDNF];
         }
         else
@@ -78,15 +84,19 @@
         
     }
     
+    // Parametres de chronometre
     NSTimeInterval currentTime = [NSDate timeIntervalSinceReferenceDate];
-    NSTimeInterval elapsedTime = currentTime - time;
+    NSTimeInterval elapsedTime = currentTime - timeInterval;
+    officialTime = elapsedTime;
     
     minutes         = (int)(elapsedTime / 60.0);
     seconds         = (int)(elapsedTime = elapsedTime - (minutes * 60.0));
     milliseconds    = (elapsedTime - seconds)*1000;
-    self.clockDisplay.text = [NSString stringWithFormat:@"%02u : %02u : %03u", minutes, seconds, milliseconds];
     
-    [self performSelector:@selector(update) withObject:(self) afterDelay:0.1];
+    // Affichage du chronometre avec delai de 0.01
+    self.clockDisplay.text = [NSString stringWithFormat:@"%02u : %02u : %03u", minutes, seconds, milliseconds];
+    [self performSelector:@selector(update) withObject:(self) afterDelay:0.01];
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -94,7 +104,37 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)saveTime {
+    
+    // Enregistre temps officiel
+    participantItem.itemTime = officialTime + participantItem.itemTime;
+    NSLog(@"Temps enregistre: %lf", participantItem.itemTime);
+    
+    // Logique du tableau a faire dans arrayMeneur
+    
+    // Si 1er place inferieur ou null
+    // Ecrase cellule
+    
+    // Si 2e place inferieur ou null
+    // Ecrase
+    
+    // Si 3e
+    // Ecrase
+    
+    // Incremente tour
+    participantItem.itemTour ++;
+    NSLog(@"Tours: %d", participantItem.itemTour);
+    
+    // Effacer cellule du participant au deuxieme tour
+    if((int)participantItem.itemTour == 2)
+        [self.arrayNextParticipants removeObjectAtIndex:rowNo];
+    
+    [self.nextParticipants reloadData];
+    
+}
+
 - (IBAction)buttonDisplay:(id)sender {
+    
     if (start == false) {
         DidNotFinish = false;
         start = true;
@@ -102,7 +142,7 @@
         seconds = 0;
         penaltyCountVar = 0;
         
-        time = [NSDate timeIntervalSinceReferenceDate];
+        timeInterval = [NSDate timeIntervalSinceReferenceDate];
         
         [sender setTitle:@"Stop" forState:UIControlStateNormal];
         
@@ -144,6 +184,9 @@
         // Afficher le resultat final
         self.clockDisplay.text = self.finalTimeWithPenalty.text;
         
+        // Enregistre le resultat
+        [self saveTime];
+        
         [sender setTitle:@"Start" forState: UIControlStateNormal];
         [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         
@@ -157,7 +200,13 @@
     DidNotFinish = false;
     self.finishTimeNoPenalty.text = @"DNF";
     self.finalTimeWithPenalty.text = @"DNF";
-    self.penaltyCount.text = [NSString stringWithFormat:@"%u x 30 s.", penaltyCountVar];
+    if(penaltyCountVar < 3)
+        self.penaltyCount.text = [NSString stringWithFormat:@"%u x 30 s.", penaltyCountVar];
+    else
+        self.penaltyCount.text = @"DSQ";
+    
+    // Enregistre le resultat
+    [self saveTime];
     
     [self.editStartButton setTitle:@"Start" forState: UIControlStateNormal];
     [self.editStartButton  setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
@@ -193,14 +242,17 @@
 */
 
 - (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-   return [self.arrayNextParticipants count];
+//    if(tableView == self.meneursParticipants)
+//        return 3;
+//    else
+        return [self.arrayNextParticipants count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"nextParticipants"];
     // Configure the cell
-    ParticipantItem *participantItem = [self.arrayNextParticipants objectAtIndex:indexPath.row];
+    participantItem = [self.arrayNextParticipants objectAtIndex:indexPath.row];
     
     //On combine le prenom, nom et pays du participant.
     //ParticipantItem *participant = [arrayNextParticipants objectAtIndex:0];
@@ -220,6 +272,28 @@
     }
     return cell;
     
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    rowNo = (int)indexPath.row;
+    
+    participantItem = [self.arrayNextParticipants objectAtIndex:indexPath.row];
+    
+    NSLog(@"%@", participantItem.itemNumero);
+    
+    // Affichage du joueur selectionne
+    self.JoueurDossard.text = participantItem.itemNumero;
+    self.JoueurDrapeauImg.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png",participantItem.itemPays]];
+    self.JoueurDrapeauNom.text = participantItem.itemPays;
+    self.JoueurPrenomNom.text = [NSString stringWithFormat:@"%@ %@", participantItem.itemPrenom, participantItem.itemNomFamille];
+
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 60;
 }
 
 @end

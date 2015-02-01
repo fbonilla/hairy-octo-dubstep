@@ -19,7 +19,10 @@
 //Numero de dossard
 @property NSString *itemNumero;
 
+//Temps cumulatif
+@property NSTimeInterval itemTime;
 
-@property NSValue *itemTime;
+//Nombre de tours
+@property int itemTour;
 
 @end
