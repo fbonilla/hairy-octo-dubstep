@@ -49,6 +49,7 @@
 }
 
 @synthesize arrayNextParticipants;
+@synthesize arrayMeneurParticipants;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -58,7 +59,8 @@
     start = false;
     
     participantItem = nil;
-
+    
+   arrayMeneurParticipants = [[NSMutableArray alloc] init];
 }
 
 - (void) update{
@@ -79,7 +81,7 @@
         }
         else
         {
-            self.runtimePenaltyCount.text = [NSString stringWithFormat:@"%u", penaltyCountVar*30];
+            self.runtimePenaltyCount.text = [NSString stringWithFormat:@"Penalite: %u", penaltyCountVar*30];
         }
         
     }
@@ -106,35 +108,108 @@
 
 - (void)saveTime {
     
-    if([self.arrayNextParticipants objectAtIndex:rowNo] != nil){
+    if([self.arrayNextParticipants objectAtIndex:0] != nil){
         
         // Enregistre temps officiel
+        //int officialTime =  penaltyCountVar * 30 + participantItem.itemTime;
+        
         participantItem.itemTime = officialTime + penaltyCountVar * 30 + participantItem.itemTime;
+      
+       // participantItem.itemTime = officialTime;
+    
+       
+        
         NSLog(@"Temps enregistre: %lf", participantItem.itemTime);
         
         // Logique du tableau a faire dans arrayMeneur
+        [self orderWinnersParticipantArray];
+      
         
-        // Si 1er place inferieur ou null
-        // Ecrase cellule
         
-        // Si 2e place inferieur ou null
-        // Ecrase
-        
-        // Si 3e
-        // Ecrase
-        
-        // Incremente tour
-        participantItem.itemTour ++;
-        NSLog(@"Tours: %d", participantItem.itemTour);
-        
-        // Effacer cellule du participant au deuxieme tour
-        if((int)participantItem.itemTour == 2)
-            [self.arrayNextParticipants removeObjectAtIndex:rowNo];
+        if(participantItem.itemTour == 2)
+        {
+            [self.arrayNextParticipants removeObjectAtIndex:0];
+        }
+        else
+        {
+            ParticipantItem* part = [self.arrayNextParticipants objectAtIndex:0];
+            [self.arrayNextParticipants removeObjectAtIndex:0];
+            [self.arrayNextParticipants insertObject:part atIndex:[self.arrayNextParticipants count]];
+        }
         
         [self.nextParticipants reloadData];
-
+        
     }
     
+}
+
+-(void)orderWinnersParticipantArray
+{
+    
+    
+   if(self.arrayMeneurParticipants.count != 0)
+   {
+       //remove twins
+       for(int j = 0; j< self.arrayMeneurParticipants.count; j++)
+       {
+           ParticipantItem *part = [self.arrayMeneurParticipants objectAtIndex:j];
+          
+           if(participantItem.itemNumero == part.itemNumero)
+           {
+               
+               [self.arrayMeneurParticipants removeObjectAtIndex:j];
+               
+           }
+       }
+       
+       //pour la taille de l'array inserer...
+       for(int i =0; i < self.arrayMeneurParticipants.count; i++)
+       {
+            ParticipantItem *part = [self.arrayMeneurParticipants objectAtIndex:i];
+           
+            if(participantItem.itemTime < part.itemTime)
+            {
+                if(i<2)
+                {
+                    [self.arrayMeneurParticipants insertObject:participantItem atIndex:i];
+                }
+                
+                participantItem.itemPosition = [NSString stringWithFormat:@"%U",i+1];
+                break;
+            }
+            else if( i == (self.arrayMeneurParticipants.count -1) && i < 2)
+            {
+                [self.arrayMeneurParticipants insertObject:participantItem atIndex:(i+1)];
+                participantItem.itemPosition = [NSString stringWithFormat:@"%U",i+2];
+
+                break;
+            }
+           
+        }
+       
+       
+   }
+   else
+   {
+       [self.arrayMeneurParticipants addObject:participantItem];
+   }
+    
+   [self.meneursParticipants reloadData];
+}
+
+-(void)selectCurrentParticipant
+{
+    participantItem = [self.arrayNextParticipants objectAtIndex:0];
+    
+    NSLog(@"Dossard: %@", participantItem.itemNumero);
+    
+    // Affichage du joueur selectionne
+    self.JoueurDossard.text = participantItem.itemNumero;
+    self.JoueurDrapeauImg.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png",participantItem.itemPays]];
+    self.JoueurDrapeauNom.text = participantItem.itemPays;
+    self.JoueurPrenomNom.text = [NSString stringWithFormat:@"%@ %@", participantItem.itemPrenom, participantItem.itemNomFamille];
+    
+    participantItem.itemTour ++;
 }
 
 - (IBAction)buttonDisplay:(id)sender {
@@ -145,6 +220,9 @@
         minutes = 0;
         seconds = 0;
         penaltyCountVar = 0;
+        
+        
+        [self selectCurrentParticipant];
         
         timeInterval = [NSDate timeIntervalSinceReferenceDate];
         
@@ -189,7 +267,11 @@
         self.clockDisplay.text = self.finalTimeWithPenalty.text;
         
         // Enregistre le resultat
-        [self saveTime];
+        if(arrayNextParticipants.count > 0)
+        {
+             [self saveTime];
+        }
+       
         
         [sender setTitle:@"Start" forState: UIControlStateNormal];
         [sender setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
@@ -246,15 +328,44 @@
 */
 
 - (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-//    if(tableView == self.meneursParticipants)
-//        return 3;
-//    else
+    if(tableView == self.meneursParticipants)
+        return [self.arrayMeneurParticipants count];
+    else
+    {
         return [self.arrayNextParticipants count];
+    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+   
+    UITableViewCell *cell=nil;
     
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"nextParticipants"];
+    if(tableView == self.meneursParticipants)
+    {
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"meneursParticipants"];
+        
+        // Configure the cell
+        ParticipantItem *participantIt = [self.arrayMeneurParticipants objectAtIndex:indexPath.row];
+        cell.backgroundColor = [UIColor clearColor];
+        
+        //On combine le prenom et nom du participant.
+        cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", participantIt.itemPrenom, participantIt.itemNomFamille];
+        
+        int minutesF         = (int)(participantIt.itemTime / 60.0);
+        int secondsF        = (int)(participantIt.itemTime = participantIt.itemTime - (minutesF * 60.0));
+        int millisecondsF   = (participantIt.itemTime - secondsF)*1000;
+        
+        // Le numero de dossard ira dans la section detail
+        cell.detailTextLabel.text = [NSString stringWithFormat:@"%02u : %02u : %03u  #%@", minutesF , secondsF, millisecondsF, participantIt.itemNumero];
+        
+        // Rajouter le drapeau du pays
+        cell.imageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", participantIt.itemPays]];
+        
+        return cell;
+    }
+    else
+    {
+    cell = [tableView dequeueReusableCellWithIdentifier:@"nextParticipants"];
     // Configure the cell
     participantItem = [self.arrayNextParticipants objectAtIndex:indexPath.row];
     cell.backgroundColor = [UIColor clearColor];
@@ -276,24 +387,13 @@
         cell.detailTextLabel.text = @"";
         cell.imageView.image = [UIImage imageNamed:@"blank.png"];
     }
+    }
     return cell;
     
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
-    rowNo = (int)indexPath.row;
-    
-    participantItem = [self.arrayNextParticipants objectAtIndex:indexPath.row];
-    
-    NSLog(@"Dossard: %@", participantItem.itemNumero);
-    
-    // Affichage du joueur selectionne
-    self.JoueurDossard.text = participantItem.itemNumero;
-    self.JoueurDrapeauImg.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png",participantItem.itemPays]];
-    self.JoueurDrapeauNom.text = participantItem.itemPays;
-    self.JoueurPrenomNom.text = [NSString stringWithFormat:@"%@ %@", participantItem.itemPrenom, participantItem.itemNomFamille];
 
 }
 

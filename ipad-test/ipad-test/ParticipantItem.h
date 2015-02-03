@@ -15,6 +15,7 @@
 @property NSString *itemNomFamille;
 @property NSString *itemPays;
 @property NSString *infoComplete;
+@property NSString *itemPosition;
 
 //Numero de dossard
 @property NSString *itemNumero;
