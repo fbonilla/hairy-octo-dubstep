@@ -213,6 +213,8 @@
 		7C75BABF1A7DC040006287A9 /* Yemen.png in Resources */ = {isa = PBXBuildFile; fileRef = 7C75B9FC1A7DC040006287A9 /* Yemen.png */; };
 		7C75BAC01A7DC040006287A9 /* Zambia.png in Resources */ = {isa = PBXBuildFile; fileRef = 7C75B9FD1A7DC040006287A9 /* Zambia.png */; };
 		7C75BAC11A7DC040006287A9 /* Zimbabwe.png in Resources */ = {isa = PBXBuildFile; fileRef = 7C75B9FE1A7DC040006287A9 /* Zimbabwe.png */; };
+		7CD435511A808B850056EEE3 /* Splashscreen_Lab1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7CD435501A808B850056EEE3 /* Splashscreen_Lab1.png */; };
+		7CD435531A809E5B0056EEE3 /* Slalom_lab1.png in Resources */ = {isa = PBXBuildFile; fileRef = 7CD435521A809E5B0056EEE3 /* Slalom_lab1.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -441,6 +443,8 @@
 		7C75B9FC1A7DC040006287A9 /* Yemen.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Yemen.png; sourceTree = "<group>"; };
 		7C75B9FD1A7DC040006287A9 /* Zambia.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Zambia.png; sourceTree = "<group>"; };
 		7C75B9FE1A7DC040006287A9 /* Zimbabwe.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Zimbabwe.png; sourceTree = "<group>"; };
+		7CD435501A808B850056EEE3 /* Splashscreen_Lab1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Splashscreen_Lab1.png; sourceTree = "<group>"; };
+		7CD435521A809E5B0056EEE3 /* Slalom_lab1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Slalom_lab1.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -530,9 +534,11 @@
 		7C75B93B1A7DC03F006287A9 /* Flags */ = {
 			isa = PBXGroup;
 			children = (
+				7CD435521A809E5B0056EEE3 /* Slalom_lab1.png */,
 				7C6734BA1A7E0A4E001466F0 /* blank.png */,
 				7C75B93C1A7DC03F006287A9 /* Afghanistan.png */,
 				7C75B93D1A7DC03F006287A9 /* Albania.png */,
+				7CD435501A808B850056EEE3 /* Splashscreen_Lab1.png */,
 				7C75B93E1A7DC03F006287A9 /* Algeria.png */,
 				7C75B93F1A7DC03F006287A9 /* Andorra.png */,
 				7C75B9401A7DC03F006287A9 /* Antigua-and-Barbuda.png */,
@@ -827,6 +833,7 @@
 				7C75BA5B1A7DC040006287A9 /* Kyrgyzstan.png in Resources */,
 				7C75BA861A7DC040006287A9 /* Paraguay.png in Resources */,
 				7C75BA4F1A7DC040006287A9 /* Israel.png in Resources */,
+				7CD435531A809E5B0056EEE3 /* Slalom_lab1.png in Resources */,
 				7C75BA561A7DC040006287A9 /* Kiribati.png in Resources */,
 				7C75BA031A7DC040006287A9 /* Antigua-and-Barbuda.png in Resources */,
 				7C75BA341A7DC040006287A9 /* Equatorial-Guinea.png in Resources */,
@@ -972,6 +979,7 @@
 				7C75BABA1A7DC040006287A9 /* Uzbekistan.png in Resources */,
 				7C75BA151A7DC040006287A9 /* Brazil.png in Resources */,
 				7C75BA301A7DC040006287A9 /* East-Timor.png in Resources */,
+				7CD435511A808B850056EEE3 /* Splashscreen_Lab1.png in Resources */,
 				7C75BA0B1A7DC040006287A9 /* Bangladesh.png in Resources */,
 				7C75BA831A7DC040006287A9 /* Palau.png in Resources */,
 				7C75BA761A7DC040006287A9 /* Mozambique.png in Resources */,

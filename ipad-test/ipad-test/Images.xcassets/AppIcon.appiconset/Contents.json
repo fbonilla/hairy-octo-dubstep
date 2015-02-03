@@ -26,8 +26,9 @@
       "scale" : "1x"
     },
     {
-      "idiom" : "ipad",
       "size" : "76x76",
+      "idiom" : "ipad",
+      "filename" : "Slalom_lab1.png",
       "scale" : "2x"
     }
   ],

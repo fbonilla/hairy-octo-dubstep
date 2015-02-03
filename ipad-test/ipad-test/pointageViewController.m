@@ -106,30 +106,34 @@
 
 - (void)saveTime {
     
-    // Enregistre temps officiel
-    participantItem.itemTime = officialTime + participantItem.itemTime;
-    NSLog(@"Temps enregistre: %lf", participantItem.itemTime);
-    
-    // Logique du tableau a faire dans arrayMeneur
-    
-    // Si 1er place inferieur ou null
-    // Ecrase cellule
-    
-    // Si 2e place inferieur ou null
-    // Ecrase
-    
-    // Si 3e
-    // Ecrase
-    
-    // Incremente tour
-    participantItem.itemTour ++;
-    NSLog(@"Tours: %d", participantItem.itemTour);
-    
-    // Effacer cellule du participant au deuxieme tour
-    if((int)participantItem.itemTour == 2)
-        [self.arrayNextParticipants removeObjectAtIndex:rowNo];
-    
-    [self.nextParticipants reloadData];
+    if([self.arrayNextParticipants objectAtIndex:rowNo] != nil){
+        
+        // Enregistre temps officiel
+        participantItem.itemTime = officialTime + penaltyCountVar * 30 + participantItem.itemTime;
+        NSLog(@"Temps enregistre: %lf", participantItem.itemTime);
+        
+        // Logique du tableau a faire dans arrayMeneur
+        
+        // Si 1er place inferieur ou null
+        // Ecrase cellule
+        
+        // Si 2e place inferieur ou null
+        // Ecrase
+        
+        // Si 3e
+        // Ecrase
+        
+        // Incremente tour
+        participantItem.itemTour ++;
+        NSLog(@"Tours: %d", participantItem.itemTour);
+        
+        // Effacer cellule du participant au deuxieme tour
+        if((int)participantItem.itemTour == 2)
+            [self.arrayNextParticipants removeObjectAtIndex:rowNo];
+        
+        [self.nextParticipants reloadData];
+
+    }
     
 }
 
@@ -253,10 +257,12 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"nextParticipants"];
     // Configure the cell
     participantItem = [self.arrayNextParticipants objectAtIndex:indexPath.row];
+    cell.backgroundColor = [UIColor clearColor];
+    cell.contentView.backgroundColor = [UIColor clearColor];
     
     //On combine le prenom, nom et pays du participant.
     //ParticipantItem *participant = [arrayNextParticipants objectAtIndex:0];
-    NSLog(@"Prenom%@",participantItem.itemPrenom);
+    NSLog(@"Prenom: %@",participantItem.itemPrenom);
     
     NSString *infoParticipant = [NSString stringWithFormat:@"%@ %@", participantItem.itemPrenom, participantItem.itemNomFamille];
     
@@ -281,7 +287,7 @@
     
     participantItem = [self.arrayNextParticipants objectAtIndex:indexPath.row];
     
-    NSLog(@"%@", participantItem.itemNumero);
+    NSLog(@"Dossard: %@", participantItem.itemNumero);
     
     // Affichage du joueur selectionne
     self.JoueurDossard.text = participantItem.itemNumero;

@@ -87,6 +87,7 @@
         // Formattage de chiffres pour detecter lettre dans dossard
         NSNumberFormatter * f = [[NSNumberFormatter alloc] init];
         NSNumber * n = [f numberFromString:self.Dossard.text];
+        NSNumber * max = [NSNumber numberWithInt:1000];
         NSLog(@"N: %@", n);
         
         if(self.Dossard.text.length == 0){
@@ -97,7 +98,7 @@
             NSLog(@"Dossard genere: %@", self.Dossard.text);
             
         }
-        else if(n == nil){
+        else if(n == nil || n > max){
             
             // Si la case contient des lettres
             

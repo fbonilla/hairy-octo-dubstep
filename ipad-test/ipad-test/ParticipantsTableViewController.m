@@ -76,6 +76,7 @@
     
     // Configure the cell
     ParticipantItem *participantItem = [self.arrayParticipants objectAtIndex:indexPath.row];
+    cell.backgroundColor = [UIColor clearColor];
     
     //On combine le prenom et nom du participant.
     cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", participantItem.itemPrenom, participantItem.itemNomFamille];
