@@ -28,6 +28,7 @@
 @property (weak, nonatomic) IBOutlet UIImageView *JoueurDrapeauImg;
 @property (weak, nonatomic) IBOutlet UILabel *JoueurPrenomNom;
 @property (weak, nonatomic) IBOutlet UILabel *JoueurDrapeauNom;
+@property (weak, nonatomic) IBOutlet UILabel *JoueurPosition;
 
 - (void)configureView;
 
@@ -81,7 +82,7 @@
         }
         else
         {
-            self.runtimePenaltyCount.text = [NSString stringWithFormat:@"Penalite: %u", penaltyCountVar*30];
+            self.runtimePenaltyCount.text = [NSString stringWithFormat:@"Penalite: + %u secondes", penaltyCountVar*30];
         }
         
     }
@@ -110,16 +111,22 @@
     
     if([self.arrayNextParticipants objectAtIndex:0] != nil){
         
-        // Enregistre temps officiel
-        //int officialTime =  penaltyCountVar * 30 + participantItem.itemTime;
+        if(DidNotFinish)
+        {
+            DidNotFinish = false;
+            participantItem.itemTime = participantItem.itemTime + 56000;
+            participantItem.itemMinutes += floor(participantItem.itemTime / 60);
+            
+        }
+        else{
+            double ns = participantItem.itemTime;
+            
+            participantItem.itemTime = (double)officialTime + (double)(penaltyCountVar * 30)+ ns;
+            participantItem.itemMinutes += floor(participantItem.itemTime / 60);
+        }
         
-        participantItem.itemTime = officialTime + penaltyCountVar * 30 + participantItem.itemTime;
-      
        // participantItem.itemTime = officialTime;
-    
-       
-        
-        NSLog(@"Temps enregistre: %lf", participantItem.itemTime);
+//        NSLog(@"Temps enregistre: %lf", participantItem.itemTime);
         
         // Logique du tableau a faire dans arrayMeneur
         [self orderWinnersParticipantArray];
@@ -137,6 +144,11 @@
             [self.arrayNextParticipants insertObject:part atIndex:[self.arrayNextParticipants count]];
         }
         
+        // Afficher gagnant lorsque liste participant est vide
+        if(self.arrayNextParticipants.count == 0){
+            [self afficherGagnant];
+        }
+        
         [self.nextParticipants reloadData];
         
     }
@@ -152,7 +164,7 @@
        //remove twins
        for(int j = 0; j< self.arrayMeneurParticipants.count; j++)
        {
-           ParticipantItem *part = [self.arrayMeneurParticipants objectAtIndex:j];
+           ParticipantItem *part = [arrayMeneurParticipants objectAtIndex:j];
           
            if(participantItem.itemNumero == part.itemNumero)
            {
@@ -162,30 +174,36 @@
            }
        }
        
+       if(arrayMeneurParticipants.count == 0)
+       {
+            [self.arrayMeneurParticipants addObject:participantItem];
+       }
+       else
+       {
+       
        //pour la taille de l'array inserer...
        for(int i =0; i < self.arrayMeneurParticipants.count; i++)
        {
             ParticipantItem *part = [self.arrayMeneurParticipants objectAtIndex:i];
            
-            if(participantItem.itemTime < part.itemTime)
+            if((participantItem.itemTime + (double)(participantItem.itemMinutes *60)) < (part.itemTime + (double)(part.itemMinutes *60)))
             {
-                if(i<2)
-                {
+                //if(i<2)
+               // {
                     [self.arrayMeneurParticipants insertObject:participantItem atIndex:i];
-                }
+             //   }
                 
-                participantItem.itemPosition = [NSString stringWithFormat:@"%U",i+1];
+               
                 break;
             }
-            else if( i == (self.arrayMeneurParticipants.count -1) && i < 2)
+            else if( i == (self.arrayMeneurParticipants.count -1))
             {
                 [self.arrayMeneurParticipants insertObject:participantItem atIndex:(i+1)];
-                participantItem.itemPosition = [NSString stringWithFormat:@"%U",i+2];
-
                 break;
             }
            
         }
+       }
        
        
    }
@@ -195,7 +213,25 @@
    }
     
    [self.meneursParticipants reloadData];
+    
+   [self UpdateParticipantPosition];
+    
+    self.JoueurPosition.text = participantItem.itemPosition;
 }
+
+-(void)UpdateParticipantPosition
+{
+    if(arrayMeneurParticipants.count !=0)
+    {
+        for(int i =0 ; i < arrayMeneurParticipants.count; i++)
+        {
+            ParticipantItem* part = [arrayMeneurParticipants objectAtIndex:i];
+            part.itemPosition = [NSString stringWithFormat:@"%U", i+1];
+
+        }
+    }
+}
+
 
 -(void)selectCurrentParticipant
 {
@@ -208,6 +244,7 @@
     self.JoueurDrapeauImg.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png",participantItem.itemPays]];
     self.JoueurDrapeauNom.text = participantItem.itemPays;
     self.JoueurPrenomNom.text = [NSString stringWithFormat:@"%@ %@", participantItem.itemPrenom, participantItem.itemNomFamille];
+    self.JoueurPosition.text = participantItem.itemPosition;
     
     participantItem.itemTour ++;
 }
@@ -215,14 +252,25 @@
 - (IBAction)buttonDisplay:(id)sender {
     
     if (start == false) {
-        DidNotFinish = false;
-        start = true;
-        minutes = 0;
-        seconds = 0;
-        penaltyCountVar = 0;
+       
         
-        
-        [self selectCurrentParticipant];
+        if(self.arrayNextParticipants.count == 0)
+        {
+            //Message d'erreur
+            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Il n'y a pas assez de participant prêt"message:[[NSString alloc]initWithFormat:@"Veuillez ajouter des participants a la competition + ou appuyer sur Begin"] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+            [alert show];
+            return;
+        }
+        else
+        {
+            DidNotFinish = false;
+            start = true;
+            minutes = 0;
+            seconds = 0;
+            penaltyCountVar = 0;
+            [self selectCurrentParticipant];
+            
+        }
         
         timeInterval = [NSDate timeIntervalSinceReferenceDate];
         
@@ -266,8 +314,8 @@
         // Afficher le resultat final
         self.clockDisplay.text = self.finalTimeWithPenalty.text;
         
-        // Enregistre le resultat
-        if(arrayNextParticipants.count > 0)
+//         Enregistre le resultat
+        if(arrayNextParticipants.count !=0 )
         {
              [self saveTime];
         }
@@ -283,7 +331,6 @@
 - (void) endPerfomanceDNF{
     
     start = false;
-    DidNotFinish = false;
     self.finishTimeNoPenalty.text = @"DNF";
     self.finalTimeWithPenalty.text = @"DNF";
     if(penaltyCountVar < 3)
@@ -292,7 +339,10 @@
         self.penaltyCount.text = @"DSQ";
     
     // Enregistre le resultat
-    [self saveTime];
+    if(arrayNextParticipants.count !=0)
+    {
+        [self saveTime];
+    }
     
     [self.editStartButton setTitle:@"Start" forState: UIControlStateNormal];
     [self.editStartButton  setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
@@ -308,8 +358,9 @@
 
 - (IBAction)buttonDNF:(id)sender {
     
-    if(DidNotFinish == false)
+    if(DidNotFinish == false && arrayNextParticipants.count != 0 && start == true)
     {
+        DidNotFinish =true;
         [self endPerfomanceDNF];
     }
 }
@@ -346,24 +397,38 @@
         
         // Configure the cell
         ParticipantItem *participantIt = [self.arrayMeneurParticipants objectAtIndex:indexPath.row];
+        
         cell.backgroundColor = [UIColor clearColor];
+        cell.contentView.backgroundColor = [UIColor clearColor];
         
         //On combine le prenom et nom du participant.
         cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", participantIt.itemPrenom, participantIt.itemNomFamille];
+        int minutesF = 0;
+        int minutesC = 0;
+        int secondsF = 0;
+        int millisecondsF = 0;
         
-        int minutesF         = (int)(participantIt.itemTime / 60.0);
-        int secondsF        = (int)(participantIt.itemTime = participantIt.itemTime - (minutesF * 60.0));
-        int millisecondsF   = (participantIt.itemTime - secondsF)*1000;
+         minutesF        = (int)(participantIt.itemTime / 60.0);
+         minutesC        = participantIt.itemMinutes;
+         secondsF        = (int)(participantIt.itemTime = participantIt.itemTime - (minutesF * 60.0));
+         millisecondsF   = (participantIt.itemTime - secondsF)*1000;
         
         // Le numero de dossard ira dans la section detail
-        cell.detailTextLabel.text = [NSString stringWithFormat:@"%02u : %02u : %03u  #%@", minutesF , secondsF, millisecondsF, participantIt.itemNumero];
+        if(minutesC == 933)
+        {
+             cell.detailTextLabel.text = [NSString stringWithFormat:@"DNF #%@", participantIt.itemNumero];
+        }
+        else
+        {
+            cell.detailTextLabel.text = [NSString stringWithFormat:@"%02u : %02u : %03u", minutesC , secondsF, millisecondsF];
+        }
         
         // Rajouter le drapeau du pays
         cell.imageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"%@.png", participantIt.itemPays]];
         
         return cell;
     }
-    else
+    else if(arrayNextParticipants.count != 0)
     {
     cell = [tableView dequeueReusableCellWithIdentifier:@"nextParticipants"];
     // Configure the cell
@@ -400,6 +465,70 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return 60;
+}
+
+/*
+ * Affichage de gagnant
+ * P.S: Code affreusement optimise -- Manque de temps
+ */
+-(void) afficherGagnant
+{
+    
+    ParticipantItem *premier 	= [self.arrayMeneurParticipants objectAtIndex:0];
+    ParticipantItem *deuxieme 	= [self.arrayMeneurParticipants objectAtIndex:1];
+    ParticipantItem *troisieme 	= [self.arrayMeneurParticipants objectAtIndex:2];
+    
+    NSString *ligne1;
+    NSString *ligne2;
+    NSString *ligne3;
+    
+    // Initialise lignes
+    // ligne1 = @"1er: Pays | Prenom Nom (#) | Temps"
+    
+    ligne1 = [NSString stringWithFormat: @"1ere place: %@ | %@ %@ (%@)",
+              premier.itemPays,
+              premier.itemPrenom,
+              premier.itemNomFamille,
+              premier.itemNumero];
+    ligne2 = [NSString stringWithFormat: @"2e place: %@ | %@ %@ (%@)",
+              deuxieme.itemPays,
+              deuxieme.itemPrenom,
+              deuxieme.itemNomFamille,
+              deuxieme.itemNumero];
+    ligne3 = [NSString stringWithFormat: @"3e place: %@ | %@ %@ (%@)",
+              troisieme.itemPays,
+              troisieme.itemPrenom,
+              troisieme.itemNomFamille,
+              troisieme.itemNumero];
+    
+    // Verifie positions identiques
+    if ( premier.itemPosition == deuxieme.itemPosition )
+        ligne2 = [NSString stringWithFormat: @"1ere place: %@ | %@ %@ (%@)",
+                  deuxieme.itemPays,
+                  deuxieme.itemPrenom,
+                  deuxieme.itemNomFamille,
+                  deuxieme.itemNumero];
+    else if( deuxieme.itemPosition == troisieme.itemPosition )
+        ligne3 = [NSString stringWithFormat: @"1ere place: %@ | %@ %@ (%@)",
+                  troisieme.itemPays,
+                  troisieme.itemPrenom,
+                  troisieme.itemNomFamille,
+                  troisieme.itemNumero];
+    
+    if( deuxieme.itemPosition == troisieme.itemPosition )
+        ligne3 = [NSString stringWithFormat: @"2e place: %@ | %@ %@ (%@)",
+                  troisieme.itemPays,
+                  troisieme.itemPrenom,
+                  troisieme.itemNomFamille,
+                  troisieme.itemNumero];
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Gagnants de la competition"
+                                                    message:[[NSString alloc]initWithFormat:@"%@\n%@\n%@", ligne1, ligne2, ligne3 ]
+                                                   delegate:self 
+                                          cancelButtonTitle:@"Ok" 
+                                          otherButtonTitles:nil];
+    [alert show];
+    
 }
 
 @end

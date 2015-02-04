@@ -21,7 +21,8 @@
 @property NSString *itemNumero;
 
 //Temps cumulatif
-@property NSTimeInterval itemTime;
+@property double itemTime;
+@property int itemMinutes;
 
 //Nombre de tours
 @property int itemTour;

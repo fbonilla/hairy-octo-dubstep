@@ -140,15 +140,14 @@
     if(sender != self.demarrer) return;
     
     if([[segue identifier] isEqualToString:@"envoieInfo"]){
-       if(arrayParticipants.count > 0){
+       if(arrayParticipants.count > 2){
            pointageViewController *pointage = [segue destinationViewController];
            pointage.arrayNextParticipants = arrayParticipants;
            NSLog(@"Bouton activee");
-        
        }
        //Affiche un message d'erreur si l'on essaie d'envoyer un array vide.
        else{
-           UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Aucun participants"message:[[NSString alloc]initWithFormat:@"Veuillez ajouter des participants avant de commencer la compétition"] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
+           UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Participants manquants"message:[[NSString alloc]initWithFormat:@"Veuillez ajouter des participants avant de commencer la compétition"] delegate:nil cancelButtonTitle:@"Ok" otherButtonTitles:nil];
            [alert show];
        }
     }
