@@ -186,7 +186,6 @@ public class DrawingView extends View {
 
 	// This is only used when currentMode==MODE_SHAPE_MANIPULATION, otherwise it is equal to -1
 	int indexOfShapeBeingManipulated = -1;
-	ArrayList< Point2D > lassoPolygonPoints = null;
 	ArrayList< Point2D > pCreate = new ArrayList<Point2D>();
 
 	MyButton lassoButton = new MyButton( "Lasso", 10, 70, 140, 140 );
@@ -321,6 +320,58 @@ public class DrawingView extends View {
 			} // if(!pCreate.isEmpty())
 			
 		} // if ( currentMode == MODE_CREATE )
+		else if ( 	currentMode != MODE_ERASE &&
+					currentMode != MODE_LASSO &&
+					currentMode != MODE_ZOOM
+				)
+		{
+			if(cursorContainer.getNumCursors() > 2)
+			{
+				Point2D posCurrent[] = new Point2D[cursorContainer.getNumCursors()];
+				
+				// Clear array list to remove cursor's initial position
+				pCreate.clear();
+				
+				// Track movements of specified index
+				for(int i = 0; i < cursorContainer.getNumCursors(); i++)
+				{
+					posCurrent[i] =  new Point2D(	
+							cursorContainer.getCursorByIndex(i).getCurrentPosition().x(), 
+							cursorContainer.getCursorByIndex(i).getCurrentPosition().y()
+					);
+					
+					// Add shape with pixel - world units conversion
+					pCreate.add( gw.convertPixelsToWorldSpaceUnits(posCurrent[i]) );
+					
+				} // for
+				
+			} // if(cursorContainer.getNumCursors() > 3)
+			
+			// Preview shape drawing
+			if(!pCreate.isEmpty())
+			{
+				gw.setColor(0, 1.0f, 1.0f, 0.5f);
+				
+				// Reconverting world space units to pixels
+				pCreate = Point2DUtil.computeConvexHull( pCreate );
+				ArrayList<Point2D> pCShow = new ArrayList<Point2D>();
+				for(Point2D p : pCreate)
+				{
+					pCShow.add(gw.convertWorldSpaceUnitsToPixels(p));
+				} 
+				gw.fillPolygon( pCShow );
+				
+			} // if(!pCreate.isEmpty())
+			
+			if ( cursorContainer.getNumCursors() == 0 ) 
+			{
+				if(!pCreate.isEmpty())
+				{
+					shapeContainer.addShape(pCreate);
+					pCreate.clear();
+				}
+			}
+		}
 
 		if ( cursorContainer.getNumCursors() > 0 ) {
 			gw.setFontHeight( 30 );
@@ -330,7 +381,7 @@ public class DrawingView extends View {
 			gw.drawString( 300, 50, "# of shapes: " + shapeContainer.shapes.size());
 			
 			// Draw coordinates, initial/current line and touch + ID inputs
-			Point2D posCurrent, posFirst;
+			Point2D posCurrent, posFirst, posPrevious;
 			for(int i = 0; i < cursorContainer.getNumCursors(); i++){
 				posCurrent = new Point2D(	
 						cursorContainer.getCursorByIndex(i).getCurrentPosition().x(), 
@@ -339,6 +390,10 @@ public class DrawingView extends View {
 				posFirst = new Point2D(
 						cursorContainer.getCursorByIndex(i).getFirstPosition().x(), 
 						cursorContainer.getCursorByIndex(i).getFirstPosition().y()
+						); 
+				posPrevious = new Point2D(
+						cursorContainer.getCursorByIndex(i).getPreviousPosition().x(), 
+						cursorContainer.getCursorByIndex(i).getPreviousPosition().y()
 						); 
 				gw.setColor(0.5f, 0.5f, 0.5f, 0.5f);
 				gw.fillCircle(posCurrent.x(), posCurrent.y(), 50);
@@ -350,7 +405,8 @@ public class DrawingView extends View {
 						(int)posCurrent.x() + 
 						" ; " + (int)posCurrent.y() + 
 						" )");
-				gw.drawLine(posFirst.x(), posFirst.y(), posCurrent.x(), posCurrent.y());
+				gw.drawLine(posFirst.x(), posFirst.y(), posPrevious.x(), posPrevious.y());
+				gw.drawLine(posPrevious.x(), posPrevious.y(), posCurrent.x(), posCurrent.y());
 				gw.drawCircle(posCurrent.x(), posCurrent.y(), 50);
 				
 			} // for(int i = 0; i < cursorContainer.getNumCursors(); i++)
@@ -479,9 +535,51 @@ public class DrawingView extends View {
 						} 
 						else if ( cursorContainer.getNumCursors() == 1 && type == MotionEvent.ACTION_MOVE ) {
 							MyCursor cursor0 = cursorContainer.getCursorByIndex( 0 );
-							Vector2D translation = Point2D.diff( cursor0.getCurrentPosition(), 
-									cursor0.getPreviousPosition());
-							gw.pan(translation.x(), translation.y());
+							Vector2D translation = Point2D.diff( 
+									cursor0.getCurrentPosition() , 
+									cursor0.getPreviousPosition()
+							);
+							
+							// Create appropriate array list that contains all selected points
+							ArrayList<Point2D> pSelMove = new ArrayList<Point2D>();
+							AlignedRectangle2D rect = new AlignedRectangle2D();
+							for(Shape s : selectedShapes)
+							{
+								pSelMove.addAll( s.getPoints() );
+								for(Point2D p : s.getPoints()){
+									rect.bound( p );
+								}
+							}
+							
+							// Assemble all points
+							// Ok, no, that was a bad idea
+							// pSelMove = Point2DUtil.computeConvexHull(pSelMove);
+							
+							// Verify if cursor is touching selected shape
+							if(Point2DUtil.isPointInsidePolygon(
+									Point2DUtil.computeExpandedPolygon( 
+											Point2DUtil.computeConvexHull(pSelMove), 
+											rect.getDiagonal().length()/30 )									, 
+									gw.convertPixelsToWorldSpaceUnits( cursor0.getPreviousPosition() )
+										)
+									)
+							{
+								// Move selected shape
+								Point2DUtil.transformPointsBasedOnDisplacementOfOnePoint(
+										pSelMove,
+										gw.convertPixelsToWorldSpaceUnits( cursor0.getPreviousPosition() ),
+										gw.convertPixelsToWorldSpaceUnits( cursor0.getCurrentPosition() )
+										);
+								
+							}
+							else
+							{
+								// Move camera
+								gw.pan(translation.x(), translation.y());
+							}
+
+							// Cleanup
+							pSelMove.clear();
 						}
 						else if ( type == MotionEvent.ACTION_UP ) {
 							cursorContainer.removeCursorByIndex( cursorIndex );
@@ -512,6 +610,7 @@ public class DrawingView extends View {
 									gw.convertPixelsToWorldSpaceUnits( cursor0.getPreviousPosition() ),
 									gw.convertPixelsToWorldSpaceUnits( cursor0.getCurrentPosition() )
 									);
+						
 						} 
 						else if ( type == MotionEvent.ACTION_UP ) {
 							cursorContainer.removeCursorByIndex( cursorIndex );
@@ -539,7 +638,7 @@ public class DrawingView extends View {
 
 								// Need to transform the positions of the cursor from pixels to world space coordinates.
 								// We will store the world space coordinates in the following data structure.
-								lassoPolygonPoints = new ArrayList< Point2D >();
+								ArrayList< Point2D > lassoPolygonPoints = new ArrayList< Point2D >();
 								for ( Point2D p : cursor.getPositions() )
 									lassoPolygonPoints.add( gw.convertPixelsToWorldSpaceUnits( p ) );
 
